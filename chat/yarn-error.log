@@ -1,0 +1,76 @@
+Arguments: 
+  D:\APP\NodeJS\node.exe C:\Users\147\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add Qs
+
+PATH: 
+  C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Dev-Cpp\MinGW64\bin;C;\Program Files\Microsoft SQL Server\130\Tools\Binn\;D:\APP\mysql-8.0.22-winx64\bin;D:\APP\NodeJS\;D:\APP\pandoc-2.17.1.1;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk1.8.0_221\bin;;C:\Program Files (x86)\Tencent\微信web开发者工具\dll;D:\APP\Python37\Scripts\;D:\APP\Python37\;C:\Users\147\AppData\Local\Microsoft\WindowsApps;;D:\Program Files\JetBrains\IntelliJ IDEA 2022.1.1\bin;;C:\Program Files\Microsoft VS Code\bin;C:\Users\147\AppData\Roaming\npm;D:\APP\PyCharm 2020.1.1\bin;
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.14.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.npmjs.org/Qs: Not found
+      at Request.params.callback [as _callback] (C:\Users\147\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:66145:18)
+      at Request.self.callback (C:\Users\147\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:140890:22)
+      at Request.emit (node:events:520:28)
+      at Request.<anonymous> (C:\Users\147\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141862:10)
+      at Request.emit (node:events:520:28)
+      at IncomingMessage.<anonymous> (C:\Users\147\AppData\Roaming\npm\node_modules\yarn\lib\cli.js:141784:12)
+      at Object.onceWrapper (node:events:639:28)
+      at IncomingMessage.emit (node:events:532:35)
+      at endReadableNT (node:internal/streams/readable:1346:12)
+      at processTicksAndRejections (node:internal/process/task_queues:83:21)
+
+npm manifest: 
+  {
+    "name": "chat",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "serve": "vue-cli-service serve",
+      "build": "vue-cli-service build",
+      "electron:build": "vue-cli-service electron:build",
+      "dev": "vue-cli-service electron:serve",
+      "postinstall": "electron-builder install-app-deps",
+      "postuninstall": "electron-builder install-app-deps"
+    },
+    "main": "background.js",
+    "dependencies": {
+      "@electron/remote": "^2.0.8",
+      "axios": "^0.27.2",
+      "core-js": "^3.8.3",
+      "element-ui": "^2.15.9",
+      "vue": "^2.6.14",
+      "vue-router": "^3.5.1",
+      "vuex": "^3.6.2",
+      "vuex-electron": "^1.0.3"
+    },
+    "devDependencies": {
+      "@vue/cli-plugin-babel": "~5.0.0",
+      "@vue/cli-plugin-router": "~5.0.0",
+      "@vue/cli-plugin-vuex": "~5.0.0",
+      "@vue/cli-service": "~5.0.0",
+      "css-loader": "^6.7.1",
+      "electron": "^13.6.9",
+      "electron-devtools-installer": "^3.1.0",
+      "electron-packager": "^16.0.0",
+      "sass": "^1.32.7",
+      "sass-loader": "^12.0.0",
+      "vue-cli-plugin-electron-builder": "~2.1.1",
+      "vue-loader": "^17.0.0",
+      "vue-template-compiler": "^2.6.14",
+      "webpack": "^5.74.0",
+      "webpack-cli": "^4.10.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

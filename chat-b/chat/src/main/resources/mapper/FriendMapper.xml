@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ghr.chat.dao.FriendMapper">
+
+    <resultMap id="friendAndFriendDetail" type="com.ghr.chat.domain.vo.FriendsVO">
+        <id property="id" column="fid"/>
+        <result property="userId" column="user_id"/>
+        <result property="friendId" column="friend_id"/>
+        <result property="friendNikeName" column="friend_nike_name"/>
+
+        <association property="friendDetail" javaType="com.ghr.chat.domain.entity.User">
+            <result property="id" column="id"/>
+            <result property="userName" column="user_name"/>
+            <result property="nikeName" column="nike_name"/>
+            <result property="sex" column="sex"/>
+            <result property="birthday" column="birthday"/>
+            <result property="address" column="address"/>
+            <result property="email" column="email"/>
+            <result property="phone_number" column="phone_number"/>
+            <result property="intro" column="intro"/>
+            <result property="avatar" column="avatar"/>
+        </association>
+    </resultMap>
+    <select id="selectFriendAndFriendDetail" parameterType="long" resultMap="friendAndFriendDetail">
+        select u.*, f.id fid, f.user_id, f.friend_id, f.friend_nike_name
+        from chat_user u, chat_friend f
+        where (f.user_id = #{userId} and u.id = f.friend_id)
+    </select>
+    <select id="selectFriendAndFriendDetailByUserIdAndFriendId" resultMap="friendAndFriendDetail">
+        select u.*, f.id fid, f.user_id, f.friend_id, f.friend_nike_name
+        from chat_user u, chat_friend f
+        where (f.user_id = #{userId} and u.id = f.friend_id and f.friend_id = #{friendId})
+    </select>
+    <select id="selectFriendByUserIdAndLikeUserName" resultType="com.ghr.chat.domain.entity.User">
+        select * from chat_user u
+        where u.id in (select friend_id from chat_friend where user_id = ${userId}) and user_name like('%${userName}%')
+    </select>
+    <update id="setNikeNameByFriendsVO" parameterType="com.ghr.chat.domain.vo.FriendsVO">
+        update chat_friend
+        set friend_nike_name = #{friendNikeName}, update_time = NOW()
+        where user_id = #{userId} and friend_id = #{friendId}
+    </update>
+</mapper>
