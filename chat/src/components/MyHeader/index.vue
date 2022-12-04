@@ -68,7 +68,7 @@ export default {
       height: inherit;
       font-size: 10px;
       background-color: transparent;
-      color: rgb(185, 185, 185);
+      color: rgb(45, 45, 45);
       border: none;
       -webkit-app-region: no-drag !important;
       &.my-close:hover{

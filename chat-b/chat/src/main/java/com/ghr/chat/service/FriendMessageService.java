@@ -8,7 +8,9 @@ import com.ghr.chat.domain.vo.CallFriend;
 public interface FriendMessageService extends IService<FriendMessage> {
 
     ResponseResult messageCache(FriendMessage friendMessage);
+
     ResponseResult getAllUnreadMessage(FriendMessage friendMessage);
 
     ResponseResult call(CallFriend callFriend);
+
 }

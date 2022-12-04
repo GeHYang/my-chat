@@ -208,7 +208,10 @@ export default {
 
   .info-box {
     width: 350px;
+    padding: 0 20px;
     -webkit-app-region: no-drag;
+    border-radius: 15px;
+    background-color: rgba(77, 94, 111, 0.4);
 
     .top {
       display: flex;
@@ -262,7 +265,7 @@ export default {
           width: 45px;
           padding: 0 5px;
           text-align: justify;
-          color: #c3c3c3;
+          color: rgb(70, 70, 70);
 
           i {
             display: inline-block;
@@ -278,12 +281,6 @@ export default {
           width: 250px;
           padding: 0 15px;
 
-          // .editIcon{
-          //   position: absolute;
-          //   top: 50%;
-          //   right: 0;
-          //   transform: translateY(-50%);
-          // }
           input {
             box-sizing: border-box;
             padding: 5px 15px;
@@ -291,6 +288,7 @@ export default {
             margin-left: -15px;
             font-size: 14px;
             border: none;
+            background-color: transparent;
             &::-webkit-input-placeholder {
               color: black;
             }

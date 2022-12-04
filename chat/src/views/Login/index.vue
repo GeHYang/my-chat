@@ -206,7 +206,6 @@ export default {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #030600;
   user-select: none;
 }
 .box {
@@ -242,7 +241,7 @@ export default {
     margin: 15px 0;
     font-size: 18px;
     border: none;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid rgb(255, 255, 255);
     outline: none;
     color: white;
     background-color: transparent;
@@ -273,14 +272,14 @@ export default {
     top: 0;
     left: 0;
     font-size: 14px;
-    color: #f05bca;
+    color: #0066ff;
   }
 
   #form input:focus + label {
     top: 0;
     left: 0;
     font-size: 14px;
-    color: #f05bca;
+    color: #0066ff;
   }
 
   .btn {
@@ -298,8 +297,7 @@ export default {
     cursor: pointer;
     transform: scale(1.1);
     font-size: 20px;
-    box-shadow: 0 0 15px #f05bca, 0 0 30px #0066ff, 0 0 15px inset #f05bca,
-      0 0 30px inset #0066ff;
+    box-shadow: 0 0 20px inset #fdfdfd;
   }
 
   .btn:active {
@@ -313,7 +311,7 @@ export default {
     bottom: -20px;
     padding: 1px 2px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.367);
+    color: rgb(225, 0, 255);
     border-bottom: 1px solid rgb(0, 174, 255);
 
     &:hover {
@@ -420,18 +418,14 @@ export default {
         line-height: 50px;
         width: 80px;
         color: #004fbe;
-        border: 1px solid transparent;
-        border-left-color: #0066ff;
-        border-top-color: #0066ff;
-        border-right-color: #001c46;
-        border-bottom-color: #001c46;
+        border: 1px solid #ccc;
         transition: all 0.5s;
       }
       input[type="submit"]:hover {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgb(180, 0, 204);
         border: 1px solid transparent;
-        box-shadow: 0 0 5px #003d98 inset, 0 0 15px #003d98 inset,
-          0 0 35px #003d98 inset, 0 0 50px #003d98 inset;
+        box-shadow: 0 0 5px #fff inset, 0 0 15px #fff inset,
+          0 0 35px #fff inset, 0 0 50px #fff inset;
         transform: scale(1.1);
         border-radius: 5px;
       }
@@ -443,13 +437,17 @@ export default {
         cursor: pointer;
         position: absolute;
         right: 0;
-        line-height: 25px;
+        line-height: 20px;
+        padding: 0 5px;
         bottom: -20px;
-        color: #004aba;
-        border-bottom: 1px solid;
+        color: rgb(225, 0, 255);
+        border-bottom: 1px solid transparent;
+        font-size: 14px;
+        transition: border .3s;
 
         &:hover {
           color: #0069fd;
+          border-bottom: 1px solid white;
         }
       }
     }
@@ -465,7 +463,7 @@ export default {
   top: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(45deg, #000, #f05bca, #0066ff);
+  background: linear-gradient(45deg, #ccc, #f05bca, #0066ff);
   transform: translateX(-100%);
   animation: animate1 1s infinite linear;
 }
@@ -485,7 +483,7 @@ export default {
   right: 0;
   width: 2px;
   height: 100%;
-  background: linear-gradient(45deg, #0066ff, #f05bca, #000);
+  background: linear-gradient(45deg, #0066ff, #f05bca, #ccc);
   transform: translateY(-100%);
   animation: animate2 1s infinite linear;
   animation-delay: 0.5s;
@@ -505,7 +503,7 @@ export default {
   bottom: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(45deg, #0066ff, #f05bca, #000);
+  background: linear-gradient(45deg, #0066ff, #f05bca, #ccc);
   transform: translateX(100%);
   animation: animate3 1s infinite linear;
   animation-delay: 1s;
@@ -526,7 +524,7 @@ export default {
   left: 0;
   width: 2px;
   height: 100%;
-  background: linear-gradient(45deg, #000, #f05bca, #0066ff);
+  background: linear-gradient(45deg, #ccc, #f05bca, #0066ff);
   transform: translateY(100%);
   animation: animate4 1s infinite linear;
   animation-delay: 1.5s;

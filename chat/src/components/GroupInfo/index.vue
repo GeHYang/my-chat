@@ -97,7 +97,10 @@ export default {
 
   .info-box {
     width: 350px;
+    padding: 0 20px;
     -webkit-app-region: no-drag;
+    border-radius: 15px;
+    background-color: rgba(77, 94, 111, 0.4);
 
     .top {
       display: flex;
@@ -151,7 +154,7 @@ export default {
           width: 45px;
           padding: 0 5px;
           text-align: justify;
-          color: #c3c3c3;
+          color: rgb(70, 70, 70);
 
           i {
             display: inline-block;

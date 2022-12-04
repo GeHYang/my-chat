@@ -77,19 +77,14 @@ $r-color: green;
       i{
         position: absolute;
         top: 15px;
-        // left: 5px;
         display: block;
         width: 5px;
         height: 5px;
-        // border-left: 1px solid $bd-color;
-        // border-bottom: 1px solid $bd-color;
-        // background-color: white;
         transform: rotate(45deg);
       }
       span{
         user-select: text;
         display: block;
-        // min-height: 23px;
         line-height: 25px;
         max-width: 100%;
         padding: 2px 5px;
@@ -127,8 +122,6 @@ $r-color: green;
       flex-direction: row-reverse;
       i{
         right: 5px;
-        border-right: 1px solid $bd-color;
-        border-top: 1px solid $bd-color;
         background-color: $r-color;
       }
       span{
@@ -150,7 +143,7 @@ $r-color: green;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      color: #c3c3c3;
+      color: #4c4c4c;
 
       a{
         cursor: pointer;

@@ -267,7 +267,7 @@ export default {
 
   .list-box {
     overflow-y: auto;
-    background-color: #ececec;
+    background-color: rgba(236,236,236, .1);
 
     .searchLabel {
       display: block;
@@ -381,7 +381,7 @@ export default {
       section {
         padding: 10px;
         margin-bottom: 2px;
-        background-color: #399567;
+        background-color: rgba($color: #399567, $alpha: .3);
 
         &:hover {
           background-color: #ecabdd;

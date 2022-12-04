@@ -117,7 +117,7 @@ export default {
   box-sizing: border-box;
   overflow: hidden;
   width: 100%;
-  background-color: #f0f0f0;
+  background-color: rgba(240,240,240, .3);
 
   .chat-item-box,
   .friend-item-box,
@@ -159,7 +159,7 @@ export default {
         .last-chat-time {
           font-size: 12px;
           text-align: right;
-          color: rgb(153, 146, 146);
+          color: rgb(115, 108, 108);
         }
       }
 
@@ -174,7 +174,7 @@ export default {
           line-height: 25px;
           white-space: nowrap;
           text-overflow: ellipsis;
-          color: rgb(153, 146, 146);
+          color: rgb(115, 108, 108);
         }
 
         .unread-count {

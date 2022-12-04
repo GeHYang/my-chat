@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <div class="header">
       <section class="nikename">{{ detail.friendNikeName }}</section>
-      <section class="more" title="聊天设置">...</section>
+      <section class="more" title="聊天设置"></section>
     </div>
     <!-- 信息 -->
     <div
@@ -21,9 +21,9 @@
     <!-- 输入 -->
     <div class="msg-in">
       <section class="orther">
-        <span class="el-icon-folder-opened"></span>
-        <span class="el-icon-video-camera" @click="videoCamera('video')"></span>
-        <span class="el-icon-phone" @click="videoCamera('audio')"></span>
+        <span class="el-icon-folder-opened" title="文件"></span>
+        <span class="el-icon-video-camera" title="视频通话" @click="videoCamera('video')"></span>
+        <span class="el-icon-phone" title="语音通话" @click="videoCamera('audio')"></span>
       </section>
       <el-form @keyup.native.enter="sendMsg">
         <el-input
@@ -50,6 +50,7 @@
 import Message from "./Message.vue";
 import { mapState } from "vuex";
 import dayjs from "dayjs";
+import {encryption, decryption} from "@/utils/DHUtil"
 
 export default {
   components: { Message },
@@ -95,56 +96,22 @@ export default {
     this.$nextTick(() => {
       this.$refs["msg-box"].scrollTop = this.$refs["msg-box"].scrollHeight - 90;
     });
+    this.$bus.$on("sendMsg", async (data) => {
+      let iter = this.sendGen(data.toId, data.msg, true);
+      let a = iter.next();
+      a.value.then(() => {
+        iter.next();
+      })
+    });
   },
   methods: {
-    async sendMsg() {
-      // 匹配是否为空白字符
-      if (!/\S/.test(this.textarea)) {
-        // 格式不正确
-        this.$message("不能发送空白信息");
-        this.textarea = "";
-        return;
-      }
-      if (this.textarea[this.textarea.length - 1] == "\n") {
-        this.textarea = this.textarea.substring(0, this.textarea.length - 1);
-      }
-      // 判断上次聊天时间与此次聊天时间间隔是否大于3分钟，大于则发送一条时间信息
-      if (this.$store.state.user.messages[this.detail.friendDetail.id]) {
-        let length =
-          this.$store.state.user.messages[this.detail.friendDetail.id].length;
-        let date = new Date(
-          this.$store.state.user.messages[this.detail.friendDetail.id][
-            length - 1
-          ].createTime
-        ).getTime();
-        let nowDate = new Date().getTime();
-        if (nowDate - date > 3 * 60 * 1000) {
-          let data = {
-            fromId: this.$store.state.user.user.id,
-            toId: this.detail.friendDetail.id,
-            message: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-            type: 2,
-          };
-          let res = await this.$axios({
-            url: "/friendMessage",
-            method: "post",
-            data: data,
-          });
-          this.$store.commit("addMessage1", res.data);
-          this.$store.dispatch("chatMessageList", {
-            friendId: data.toId,
-            isFriend: false,
-          });
-        }
-      }
-
+    async send(msg){
       let data = {
         fromId: this.$store.state.user.user.id,
         toId: this.detail.friendDetail.id,
-        message: this.textarea,
+        message: msg,
         type: 0,
       };
-      this.textarea = "";
       let res = await this.$axios({
         url: "/friendMessage",
         method: "post",
@@ -160,6 +127,39 @@ export default {
           this.$refs["msg-box"].scrollHeight - 90;
       }, 100);
     },
+    parseMsg(){
+      // 匹配是否为空白字符
+      if (!/\S/.test(this.textarea)) {
+        // 格式不正确
+        this.$message("不能发送空白信息");
+        this.textarea = "";
+        return "";
+      }
+      if (this.textarea[this.textarea.length - 1] == "\n") {
+        this.textarea = this.textarea.substring(0, this.textarea.length - 1);
+      }
+      return this.textarea;
+    },
+    *sendGen(toId, msg, flag){
+      let msg1;
+      if(!flag){
+        yield this.parseMsg();
+        msg1 = this.textarea;
+        this.textarea = "";
+      }
+      yield this.sendTime(toId);
+      yield this.send(!flag ? encryption(this.user.secret[toId], msg1) : encryption(this.user.secret[toId], msg));
+    },
+    async sendMsg() {
+      let iter = this.sendGen(this.detail.friendDetail.id, this.textarea);
+      let m = iter.next();
+      if(!m.value) return;
+      m = await iter.next();
+      m.value.then(() => {
+        iter.next();
+        this.textarea = "";
+      })
+    },
     async videoCamera(callType) {
       this.$electron.ipcRenderer.send("call");
       setTimeout(() => {
@@ -171,6 +171,48 @@ export default {
         );
       }, 1000);
     },
+    /**
+     * 聊天时间
+     */
+    sendTime(toId){
+      if (this.$store.state.user.messages[toId]) {
+        let length =
+          this.$store.state.user.messages[toId].length;
+        let date = new Date(this.$store.state.user.messages[toId][length - 1].createTime).getTime();
+        let nowDate = new Date().getTime();
+        if (nowDate - date > 3 * 60 * 1000) {
+          // 判断上次聊天时间与此次聊天时间间隔是否大于3分钟，大于则发送一条时间信息
+          return this.chatTimer(this.$store.state.user.user.id, toId);
+        } else {
+          return new Promise((res, rej) => {
+            res();
+            rej();
+          });
+        }
+      } else {// 没有信息
+        return this.chatTimer(this.$store.state.user.user.id, toId);
+      }
+    },
+    chatTimer(fromId, toId){
+      return new Promise((reason, rej) => {
+        let data = {
+          fromId: fromId,
+          toId: toId,
+          message: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+          type: 2,
+        };
+        this.$axios({
+          url: "/friendMessage",
+          method: "post",
+          data: data,
+        }).then(res => {
+          this.$store.commit("addMessage1", res.data);
+          reason();
+        }).catch(() => {
+          rej();
+        })
+      })
+    }
   },
 };
 </script>
@@ -195,6 +237,7 @@ $bg-color: #f5f5f5;
     box-sizing: border-box;
     width: 100%;
     height: 30px;
+    // border-top: 1px solid #ccc;
     border-bottom: 1px solid #ccc;
     -webkit-app-region: drag;
 
@@ -226,14 +269,14 @@ $bg-color: #f5f5f5;
     box-sizing: border-box;
     padding: 0 25px;
     overflow-y: auto;
-    border-bottom: 1px solid #ccc;
-    background-color: #f5f5f5;
+    border-bottom: 1px solid #fff;
+    background-color: rgba($color: #fff, $alpha: 0);
   }
   // 输入框
   .msg-in {
     box-sizing: border-box;
     height: 120px;
-    background-color: $bg-color;
+    background-color: rgba($color: $bg-color, $alpha: 0);
 
     .orther {
       z-index: 1;
@@ -243,21 +286,25 @@ $bg-color: #f5f5f5;
 
       span {
         padding: 0 5px;
-
+        color: white;
         &:hover {
-          color: green;
+          color: rgba(255, 255, 255, 0.543);
           cursor: pointer;
         }
       }
     }
 
     ::v-deep .el-textarea__inner {
+      &::placeholder{
+        color: #fff;
+      }
       margin-top: 30px;
       border: none;
-      border-top: 1px solid #ccc;
+      border-top: 1px solid #fff;
       border-radius: 0;
       background-color: transparent;
       font-size: 16px;
+      color: white;
     }
 
     .el-button--success {

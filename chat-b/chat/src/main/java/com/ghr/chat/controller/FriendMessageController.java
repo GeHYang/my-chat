@@ -34,8 +34,7 @@ public class FriendMessageController {
 
     @PostMapping("/call")
     public ResponseResult call(@RequestBody CallFriend callFriend){
-        ResponseResult responseResult = new ResponseResult(200, "callFriend", callFriend);
-        webSocket.sendOneMessage(callFriend.getToId().toString(), JSON.toJSONString(responseResult));
         return friendMessageService.call(callFriend);
     }
+
 }

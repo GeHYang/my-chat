@@ -35,6 +35,7 @@
 import MenuBar from "../../components/MenuBar";
 import ChatList from "../../components/ChatList";
 import MyRight from "@/components/MyRight";
+import DH from "@/utils/DHUtil.js"
 import { mapState } from "vuex";
 import qs from "qs";
 
@@ -122,6 +123,7 @@ export default {
         this.$C.token = localStorage.getItem("token");
       }
       this.user = this.$store.state.user.user;
+
     } catch (e) {
       this.$router.replace("/login");
     }
@@ -132,7 +134,11 @@ export default {
     if (this.$store.state.user.friendList.length <= 0) {
       await this.findFriends();
     }
-    let res = await this.$axios({
+    
+    // 验证密钥
+    this.verifySecret();
+    
+    await this.$axios({
       url: "/friendMessage/getAllUnreadMessage",
       method: "post",
       data: {
@@ -173,36 +179,37 @@ export default {
       data = JSON.parse(data);
       if (data.type === 1) {
         that.$message.warning("通话结束");
-        let res = await that.$axios({
-          url: "/friendMessage",
-          method: "POST",
+        await that.$axios({
+          url: "/friendMessage/call",
+          method: "post",
           data: {
             fromId: data.data.fromId,
             toId: data.data.toId,
-            message: "通话结束",
-            type: 0,
+            offer: {
+              type: "end-call",
+            },
           },
         });
-        that.$store.commit("addMessage1", res.data);
-        that.$store.dispatch("chatMessageList", {
-          friendId: data.data.toId,
-          isFriend: false,
-        });
+        this.$bus.$emit("sendMsg", {toId: data.data.toId, msg: data.data.message});
       } else if (data.type === 2) {
         that.$message.error(data.msg);
       } else if (data.type === 3) {
         that.$message.warning(data.msg);
+        await that.$axios({
+          url: "/friendMessage/call",
+          method: "post",
+          data: {
+            fromId: data.data.fromId,
+            toId: data.data.toId,
+            offer: {
+              type: "end-call",
+            },
+          },
+        });
         // 发送信息
-        let res = await that.$axios({
-          url: "/friendMessage",
-          method: "POST",
-          data: data.data,
-        });
-        that.$store.commit("addMessage1", res.data);
-        that.$store.dispatch("chatMessageList", {
-          friendId: data.data.toId,
-          isFriend: false,
-        });
+        this.$bus.$emit("sendMsg", {toId: data.data.toId, msg: data.data.message});
+      } else if(data.type === 4){
+        that.$message.warning("对方已挂断");
       }
     });
   },
@@ -280,6 +287,12 @@ export default {
     // 接到呼叫，打开新页面
     recvCall(val) {
       if (val.offer.type === "connect") {
+        for(const f of this.state.friendList){
+          if(f.friendId == val.fromId){
+            val.detail = f.friendDetail;
+            break;
+          }
+        }
         this.$electron.ipcRenderer.send("call");
         setTimeout(() => {
           val.token = this.$C.token;
@@ -316,6 +329,61 @@ export default {
       this.dataList[2] = users.data;
       this.dataList = JSON.parse(JSON.stringify(this.dataList));
     },
+    // DH算法
+    verifySecret(){
+      let mySecret = (this.state.mySecret && Object.keys(this.state.mySecret).length) ? this.state.mySecret : localStorage.getItem("my-secret");
+      
+      return new Promise(async (reason, rej) => {
+        // 获取密钥信息
+        for(const friend of this.state.friendList){
+          // 密钥丢失情况，重新协商
+          if(!this.state.secret[friend.friendId] || !mySecret){
+            let res = await this.$axios({
+              url: `/secret/${friend.friendId}`,
+              method: "GET"
+            });
+            if(res.data){
+              let dh = new DH(res.data.p, res.data.g);
+              if(mySecret){
+                mySecret = JSON.parse(mySecret);
+                dh.setPrivateKey(mySecret.privateKey);
+                dh.setPublicKey(mySecret.publicKey);
+              } else {
+                localStorage.setItem("my-secret", JSON.stringify(dh));
+              }
+              let s = dh.generateSecret(res.data.publicKey);
+              this.state.secret[res.data.userId] = s;
+              // 更新密钥信息
+              if(!mySecret){
+                this.$axios({
+                  url: "/secret",
+                  method: "POST",
+                  data: {
+                    userId: this.state.user.id,
+                    p: dh.p,
+                    g: dh.g,
+                    publicKey: dh.publicKey
+                  }
+                });
+                this.$axios({
+                  url: "/friendMessage",
+                  method: "post",
+                  data: {
+                    fromId: this.state.user.id,
+                    toId: friend.friendId,
+                    type: 10, // 更新
+                  }
+                });
+                mySecret = JSON.stringify(dh);
+              }
+              this.state.mySecret = JSON.parse(JSON.stringify(dh));
+            }
+          }
+        }
+        reason();
+      });
+      
+    }
   },
   beforeDestroy() {
     window.removeEventListener("beforeunload", (e) => this.cache());
@@ -328,7 +396,7 @@ export default {
   display: flex;
   width: 100%;
   height: 100%;
-  background-color: white;
+  background-color: rgba(255, 255, 255, .3);
 
   .search-box {
     user-select: none;
@@ -360,17 +428,21 @@ export default {
         padding: 0px 20px 0px 5px;
         border: 1px solid #ececec;
         border-radius: 3px;
-        background-color: #ececec;
+        background-color: rgba($color: #ececec, $alpha: .3);
         outline: none;
-
+        color: rgb(255, 255, 255);
+        &::placeholder{
+          color: #fff;
+        }
         &:focus {
-          background-color: #fff;
+          background-color: rgba($color: #ececec, $alpha: .3);
         }
       }
       .orther {
         cursor: pointer;
         display: block;
         font-size: 25px;
+        color: white;
       }
     }
   }

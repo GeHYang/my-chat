@@ -87,7 +87,7 @@ export default {
   padding: 35px 0 0 0;
   width: 55px;
   height: 100%;
-  background-color: #2e2e2e;
+  background-color: rgba(46,46,46, .3);
   -webkit-app-region: no-drag;
 
   .menu-list {

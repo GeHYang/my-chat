@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain, session, dialog, ipcRenderer } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, session, desktopCapturer } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
 import path from 'path';
 

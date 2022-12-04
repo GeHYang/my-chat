@@ -1,5 +1,7 @@
 import ws from "@/utils/ws"
 import $C from "@/utils/config"
+import axios from '@/utils/request'
+import DH, {decryption} from "@/utils/DHUtil"
 
 export default {
   state: {
@@ -16,11 +18,16 @@ export default {
       chatMessageNotify: false,// 聊天信息通知
       addFriendNotify: false, // 添加好友信息通知
     },
+    secret: {},// 对称密钥
+    mySecret: {},
   },
   mutations: {
     async addMessage1(state, data) {
       if (!state.messages[data.toId]) {
         state.messages[data.toId] = new Array();
+      }
+      if(data.type == 0){
+        data.message = decryption(state.secret[data.toId], data.message);
       }
       await state.messages[data.toId].push(data);
       state.messages = JSON.parse(JSON.stringify(state.messages));
@@ -32,13 +39,23 @@ export default {
       state.ws = new ws("ws://" + $C.localName + ":" + $C.port + "/websocket/" + state.user.id);
       state.ws.wsCallback(async function (res) {
         if (res.msg === "oneMessageSuccess") {
+          if(res.data.type == 10){
+            dispatch("refreshSecret", res.data)
+            return;
+          }
           // 生成聊天信息列表
           if (!state.messages[res.data.fromId]) {
             state.messages[res.data.fromId] = new Array();
           }
+          // 解密
+          if(res.data.type == 0){
+            res.data.message = decryption(state.secret[res.data.fromId], res.data.message);
+          }
           await state.messages[res.data.fromId].push(res.data);
           state.messages = JSON.parse(JSON.stringify(state.messages));
-          dispatch("chatMessageList", { friendId: res.data.fromId + "", isFriend: true });
+          if(res.data.type == 0)
+            dispatch("chatMessageList", { friendId: res.data.fromId + "", isFriend: true });
+          
           state.notify.chatMessageNotify = true;
         } else if(res.msg === "callFriend"){
           state.callFriend = await {...res.data};
@@ -84,7 +101,6 @@ export default {
           break;
         }
       }
-      
       if(state.chatList[0] ?. unreadCount){
         state.chatList[0].unreadCount++
       } else{
@@ -118,6 +134,21 @@ export default {
       state.addFriendNotify.unshift(friendNotify);
       
     },
-
+    // 更新密钥信息
+    async refreshSecret({state}, {fromId}){
+      let secret = await axios({
+        url: `/secret/${fromId}`,
+        method: "GET"
+      });
+      secret = secret.data;
+      let dh = new DH(secret.p, secret.g);
+      if(state.mySecret){
+        dh.setPrivateKey(state.mySecret.privateKey);
+        dh.setPublicKey(state.mySecret.publicKey);
+      }
+      let s = dh.generateSecret(secret.publicKey);
+      state.secret[fromId] = s;
+      state.secret = JSON.parse(JSON.stringify(state.secret))
+    }
   },
 }

@@ -20,7 +20,7 @@
         </tr>
 
         <tr>
-          <td>我的ID<i></i></td>
+          <td>用户名<i></i></td>
           <td>{{ userDetail.userName }}</td>
         </tr>
         <tr>
@@ -328,15 +328,30 @@ export default {
   width: 100%;
   height: 100%;
   -webkit-app-region: drag;
-
+  ::v-deep .el-input__inner{
+    background-color: transparent;
+    color: white;
+    &::placeholder{
+      color: #ccc;
+    }
+  }
+  ::v-deep .el-radio__label{
+    color: white;
+  }
   .form {
     user-select: none;
     -webkit-app-region: no-drag;
+    padding: 20px 20px 0 20px;
+    background-color: rgba(77, 94, 111, 0.4);
+    border-radius: 20px;
     table {
       td {
         display: inline-block;
         line-height: 40px;
         height: 40px;
+        color: white;
+
+        
 
         &:nth-child(1) {
           display: inline-block;
@@ -371,6 +386,13 @@ export default {
 
   .pwd-form {
     -webkit-app-region: no-drag;
+    padding: 20px 20px 5px 5px;
+    background-color: rgba(77, 94, 111, 0.4);
+    border-radius: 20px;
+
+    ::v-deep .el-form-item__label{
+      color: white;
+    }
   }
 }
 </style>

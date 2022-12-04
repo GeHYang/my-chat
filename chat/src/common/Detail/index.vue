@@ -55,7 +55,7 @@ export default {
   width: 300px;
   height: 200px;
   padding: 30px;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   box-shadow: 0 0 5px #899;
   border-radius: 2px;
 

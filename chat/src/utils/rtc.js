@@ -12,8 +12,11 @@ export default class rtc {
     this.remoteVideo = document.querySelector("#remoteVideo");// 远程视频
     this.timeout = 15 * 1000;// 35秒
     this.timeoutFun = null;// 超时处理
+    this.callTimer = 0;// 通话时间
+    this.callTimerFun = null;// 通话时间
+    this.connectState = "";// 连接状态
     this.initOption = option ? option : {
-      video: { width: 80, height: 120 },
+      video: { width: 80, height: 150},
       audio: true
     };
   }
@@ -39,9 +42,18 @@ export default class rtc {
           this.gotRemoteMediaStream(ev)
         });
         this.pc.addEventListener("connectionstatechange", ev => {
+          this.connectState = this.pc.connectionState;
           switch (this.pc.connectionState) {
             case "disconnected":
               ipcRenderer.send("closeNewWin");
+              break;
+            case "connected":
+              clearTimeout(this.timeoutFun);// 清除超时
+              let that = this;
+              this.callTimerFun = setInterval(() => {
+                that.callTimer++;
+              }, 1000);
+              break;
           }
         });
         let that = this;
@@ -57,6 +69,7 @@ export default class rtc {
             }
           }));
         }, this.timeout);
+        
         // 发送连接请求
         axios({
           url: "/friendMessage/call",
@@ -65,7 +78,8 @@ export default class rtc {
             fromId: this.fromId,
             toId: this.toId,
             offer: {
-              type: str
+              type: str,
+              option: this.initOption
             },
           }
         }).catch(() => {
@@ -132,7 +146,7 @@ export default class rtc {
       case "answer": // 处理应答
         this.pc.setRemoteDescription(new RTCSessionDescription(description))
           .then(() => {
-            clearTimeout(this.timeoutFun);// 清除超时
+            
           })
           .catch((err) => {
             this.error("3", err)
@@ -144,7 +158,7 @@ export default class rtc {
         // 将ice添加到远程端
         this.pc.addIceCandidate(iceCandidate)
           .then(() => {
-
+            
           })
           .catch((err) => {
             this.error(err)
@@ -165,6 +179,17 @@ export default class rtc {
             }
           })
         );
+        break;
+      case "end-call":// 对方结束通话
+        ipcRenderer.send(
+          "closeNewWin",
+          JSON.stringify({
+            type: 4,
+            msg: "已挂断",
+            data: {}
+          })
+        );
+        break;
     }
   }
 
@@ -183,6 +208,7 @@ export default class rtc {
                 fromId: this.fromId,
                 toId: this.toId,
                 offer: offer,
+                // option: this.initOption
               }
             });
             

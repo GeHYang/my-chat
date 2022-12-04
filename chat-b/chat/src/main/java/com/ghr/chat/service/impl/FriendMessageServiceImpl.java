@@ -117,6 +117,8 @@ public class FriendMessageServiceImpl extends ServiceImpl<FriendMessageMapper, F
             // 不是好友
             return new ResponseResult(0, "对方不是你好友");
         }
+        ResponseResult responseResult = new ResponseResult(200, "callFriend", callFriend);
+        webSocket.sendOneMessage(callFriend.getToId().toString(), JSON.toJSONString(responseResult));
         return new ResponseResult(200, "success");
     }
 }

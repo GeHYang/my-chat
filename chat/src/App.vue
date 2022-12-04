@@ -85,6 +85,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   -webkit-app-region: drag;
+  background: url("./assets/bg.jpeg");
 
   #page {
     overflow: auto;

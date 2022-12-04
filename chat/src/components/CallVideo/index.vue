@@ -14,6 +14,7 @@
         title="全屏"
       ></button>
       <div>
+        <span class="time-count">{{timeCount == 0 ? "" : timeCount}}</span>
         <section ref="answerBtn" style="display: none">
           <a class="hang-up el-icon-phone" @click="answer"></a>
           <span>接听</span>
@@ -37,7 +38,8 @@ export default {
       isFull: false,
       detail: undefined,
       offer: null,
-      avatar: "http://192.168.1.100:8090/static/avatars/ghr.jpg",
+      avatar: "",
+      timeCount: "0",
     };
   },
   computed: {
@@ -59,24 +61,28 @@ export default {
             audio: true,
           });
         }
+        this.timerCounter();
       },
     },
     offer: {
       async handler(value, oldVal) {
         if (value == oldVal) return;
+        if(value.detail)
+          this.avatar = value.detail.avatar;
         value.token && (this.$C.token = value.token);
         if (!this.user.rtc) {
           this.$refs["answerBtn"].style.display = "";
-          this.user.rtc = new rtc(value.toId, value.fromId, false);
+
+          this.user.rtc = new rtc(value.toId, value.fromId, false, value.offer.option ? value.offer.option : null);
         } else {
           this.user.rtc.handleVideoOfferMsg(value);
         }
+        this.timerCounter();
       },
     },
   },
   beforeCreate() {
     let that = this;
-
     this.$electron.ipcRenderer.on("call-friend", (_event, value) => {
       that.detail = JSON.parse(value);
     });
@@ -87,7 +93,6 @@ export default {
   mounted() {},
   methods: {
     async closeWin() {
-      // this.user.rtc = null;
       this.$axios({
         url: "/friendMessage/call",
         method: "post",
@@ -99,7 +104,7 @@ export default {
           },
         },
       });
-      
+      let msg = this.user.rtc.connectState == "connected" ? "通话结束" + this.timeCount : "已挂断";
       this.$electron.ipcRenderer.send(
         "closeNewWin",
         JSON.stringify({
@@ -108,7 +113,7 @@ export default {
           data: {
             fromId: this.user.rtc.fromId,
             toId: this.user.rtc.toId,
-            message: "已挂断",
+            message: msg,
             type: 0,
           },
         })
@@ -126,6 +131,20 @@ export default {
       this.$refs["answerBtn"].style.display = "none";
       this.user.rtc.handleVideoOfferMsg(this.offer);
     },
+    timerCounter(){
+      let timer = 0;
+      let sleep = 200;
+      let that = this;
+      setInterval(async () => {
+        if(that.user.rtc.callTimer === 0) return;
+        sleep = 1000;
+        timer = that.user.rtc.callTimer;
+        let m = Math.floor(timer / 60);// 分钟
+        let h = Math.floor(m / 60);// 小时
+        let s = timer % 60;// 秒
+        that.timeCount = `${h > 0 ? h + ":" : ""}${m > 9 ? m : "0" + m}:${s > 9 ? s : "0" + s}`;
+      }, sleep);
+    }
   },
 };
 </script>
@@ -208,6 +227,15 @@ body {
       width: 100%;
       display: flex;
       justify-content: space-between;
+
+      .time-count{
+        position: absolute;
+        left: 50%;
+        transform: translate(-50%, -25px);
+        color: white;
+        letter-spacing: 2px;
+      }
+
       section {
         // position: absolute;
         // bottom: 30px;
@@ -215,6 +243,7 @@ body {
         flex-direction: column;
         align-items: center;
         width: 100%;
+
 
         .hang-up {
           width: 30px;
@@ -234,7 +263,7 @@ body {
             color: #ccc;
           }
         }
-        &:nth-child(1) > .hang-up {
+        &:nth-child(2) > .hang-up {
           background-color: green;
         }
         span {
